@@ -2,25 +2,605 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мой сайт</title>
+    <title>CRIPTONIST</title>
     <style>
         body {
+            background-color: #000;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 40px auto;
-            padding: 20px;
-            line-height: 1.6;
+            position: relative;
+            overflow: hidden;
+            cursor: default;
         }
-        h1 {
-            color: #333;
+        
+        #bg-video {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 90%;
+            height: 90%;
+            z-index: -2;
+            transform: translate(-50%, -50%);
+            object-fit: cover;
+        }
+        
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.3);
+            z-index: -1;
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .image-container {
+            width: 18%;
+            text-align: center;
+            position: relative;
+            min-height: 100px;
+            z-index: 10;
+        }
+        
+        .logo-img {
+            width: 30%;
+            max-width: 400px;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.5)); /* Свечение как у текста */
+        }
+        
+        .text-left, .text-right {
+            width: 30%;
+            color: #ccc;
+            font-size: 28px;
+            text-align: center;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+        
+        .percentage-text {
+            width: 30%;
+            max-width: 400px;
+            height: auto;
+            margin: 0 auto;
+            font-size: 72px;
+            color: #ddd;
+            text-align: center;
+            font-weight: bold;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            pointer-events: none;
+            z-index: 11;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+        
+        .percentage-text.active {
+            pointer-events: auto;
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+        
+        .percentage-number {
+            font-size: 52px;
+        }
+        
+        .percentage-sign {
+            font-size: 26px; /* Уменьшили размер знака процента */
+            align-self: flex-start;
+            margin-top: 10px;
+        }
+        
+        .logo-img.hidden {
+            opacity: 0;
+            transform: scale(0.8); /* Убрал rotate(-5deg) */
+            pointer-events: none;
+        }
+        
+        .dot {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            will-change: transform, opacity;
+            transform: translate3d(0, 0, 0);
+        }
+        
+        .flash {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 5;
+            transform: translate(-50%, -50%);
+            animation: flashEffect 0.2s ease-out forwards;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0) 70%);
+        }
+        
+        @keyframes flashEffect {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0);
+            }
+            50% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1.1);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(1.6);
+            }
+        }
+        
+        #dots-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
         }
     </style>
 </head>
 <body>
-    <h1>Добро пожаловать на мой сайт!</h1>
-    <p>Это тестовая страница, созданная на моём компьютере.</p>
-    <p>Здесь может быть любой текст, изображения или другая информация.</p>
-    <!-- Добавляйте свой контент здесь -->
+    <video id="bg-video" autoplay muted loop>
+        <source src="space.mp4" type="video/mp4">
+        Ваш браузер не поддерживает видео.
+    </video>
+    
+    <div class="overlay"></div>
+    
+    <div id="dots-container"></div>
+    
+    <div class="container">
+        <div class="row">
+            <div class="text-left"></div>
+            <div class="image-container">
+                <img src="logo.png" alt="Logo" class="logo-img" id="logo">
+                <div class="percentage-text" id="percentageText">
+                    <span class="percentage-number">98</span>
+                    <span class="percentage-sign">%</span>
+                </div>
+            </div>
+            <div class="text-right"></div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const video = document.getElementById('bg-video');
+            video.playbackRate = 0.7;
+            video.play().catch(() => {});
+            
+            video.addEventListener('error', function() {
+                document.body.style.background = 'url(space.jpg) no-repeat center center fixed';
+                document.body.style.backgroundSize = 'cover';
+            });
+            
+            // Элементы логотипа и текста
+            const logo = document.getElementById('logo');
+            const percentageText = document.getElementById('percentageText');
+            
+            // Флаг для отслеживания состояния
+            let isLogoVisible = true;
+            let isAnimating = false;
+            
+            // Обработчик клика на логотип
+            logo.addEventListener('click', function(e) {
+                e.stopPropagation();
+                
+                if (!isLogoVisible || isAnimating) return;
+                
+                isAnimating = true;
+                isLogoVisible = false;
+                
+                // Плавное исчезновение логотипа
+                logo.classList.add('hidden');
+                
+                // Плавное появление текста с небольшой задержкой
+                setTimeout(() => {
+                    percentageText.classList.add('active');
+                    isAnimating = false;
+                }, 300);
+            });
+            
+            // Обработчик клика на текст
+            percentageText.addEventListener('click', function(e) {
+                e.stopPropagation();
+                
+                if (isLogoVisible || isAnimating) return;
+                
+                isAnimating = true;
+                isLogoVisible = true;
+                
+                // Плавное исчезновение текста
+                percentageText.classList.remove('active');
+                
+                // Плавное появление логотипа с небольшой задержкой
+                setTimeout(() => {
+                    logo.classList.remove('hidden');
+                    isAnimating = false;
+                }, 300);
+            });
+            
+            // Параметры
+            const MAX_DOTS = 400;
+            const ATTRACTION_RADIUS = 100;
+            const ATTRACTION_FORCE = 0.11;
+            const LOGO_CLEAR_RADIUS = 460;
+            const FADE_DISTANCE = 50;
+            const FLASH_PARTICLES_COUNT = 25;
+            const BLACK_HOLE_RADIUS = 20;
+            
+            // Центр экрана
+            let logoCenterX = window.innerWidth / 2;
+            let logoCenterY = window.innerHeight / 2;
+            
+            // Позиция мыши
+            let mouseX = logoCenterX;
+            let mouseY = logoCenterY;
+            
+            const dotsContainer = document.getElementById('dots-container');
+            const dots = [];
+            let animationId;
+            
+            // Функция создания вспышки
+            function createFlash(x, y) {
+                const whiteFlash = document.createElement('div');
+                whiteFlash.className = 'flash';
+                whiteFlash.style.left = x + 'px';
+                whiteFlash.style.top = y + 'px';
+                whiteFlash.style.width = '0px';
+                whiteFlash.style.height = '0px';
+                
+                document.body.appendChild(whiteFlash);
+                
+                setTimeout(() => {
+                    if (whiteFlash.parentNode) {
+                        whiteFlash.parentNode.removeChild(whiteFlash);
+                    }
+                }, 200);
+                
+                for (let i = 0; i < FLASH_PARTICLES_COUNT; i++) {
+                    createFlashParticle(x, y);
+                }
+            }
+            
+            // Функция создания точки от вспышки
+            function createFlashParticle(x, y) {
+                const particle = document.createElement('div');
+                particle.className = 'dot';
+                
+                const size = 1.5 + Math.random() * 2.5;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                
+                const glowIntensity = 0.4 + Math.random() * 0.6;
+                particle.style.background = 'white';
+                particle.style.boxShadow = `0 0 3px 1px rgba(100, 180, 255, ${glowIntensity * 0.6})`;
+                particle.style.opacity = '0.9';
+                
+                dotsContainer.appendChild(particle);
+                
+                const angle = Math.random() * Math.PI * 2;
+                const speed = 2 + Math.random() * 1.5;
+                
+                const particleObj = {
+                    element: particle,
+                    x: x,
+                    y: y,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
+                    size: size,
+                    opacity: 0.7,
+                    lifetime: 0,
+                    maxLifetime: 20 + Math.random() * 10,
+                    isFlashParticle: true,
+                    glowIntensity: glowIntensity,
+                    isAttractedToCenter: false,
+                    isBeingConsumed: false
+                };
+                
+                dots.push(particleObj);
+                return particleObj;
+            }
+            
+            // Функция создания обычной точки
+            function createRegularDot() {
+                const angle = Math.random() * Math.PI * 2;
+                const x = logoCenterX + Math.cos(angle) * LOGO_CLEAR_RADIUS;
+                const y = logoCenterY + Math.sin(angle) * LOGO_CLEAR_RADIUS;
+                
+                const dirFromCenterX = Math.cos(angle);
+                const dirFromCenterY = Math.sin(angle);
+                const speed = 0.5 + Math.random() * 0.4;
+                
+                const dotElement = document.createElement('div');
+                dotElement.className = 'dot';
+                
+                const size = 1 + Math.random() * 2;
+                dotElement.style.width = size + 'px';
+                dotElement.style.height = size + 'px';
+                
+                const opacity = 0.4 + Math.random() * 0.3;
+                dotElement.style.opacity = opacity;
+                dotElement.style.background = 'white';
+                
+                if (Math.random() > 0.8) {
+                    dotElement.style.boxShadow = '0 0 3px 1px rgba(255, 255, 255, 0.3)';
+                }
+                
+                dotsContainer.appendChild(dotElement);
+                
+                return {
+                    element: dotElement,
+                    x: x,
+                    y: y,
+                    vx: dirFromCenterX * speed,
+                    vy: dirFromCenterY * speed,
+                    size: size,
+                    opacity: opacity,
+                    lifetime: 0,
+                    maxLifetime: 8 + Math.random() * 4,
+                    isFlashParticle: false,
+                    isAttractedToCenter: false,
+                    isBeingConsumed: false
+                };
+            }
+            
+            // Инициализация обычных точек
+            function initRegularDots() {
+                for (let i = 0; i < MAX_DOTS; i++) {
+                    dots.push(createRegularDot());
+                }
+            }
+            
+            // Обработчик клика по всему документу
+            document.addEventListener('click', (e) => {
+                // Проверяем, не кликнули ли на логотип или текст
+                const isLogoClick = e.target === logo || logo.contains(e.target);
+                const isTextClick = e.target === percentageText || percentageText.contains(e.target);
+                
+                if (!isLogoClick && !isTextClick) {
+                    createFlash(e.clientX, e.clientY);
+                }
+            });
+            
+            // Обработчик движения мыши
+            document.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+            });
+            
+            // Функция обновления точки
+            function updateDot(dot, index) {
+                dot.lifetime += 0.016;
+                
+                const dxToCenter = logoCenterX - dot.x;
+                const dyToCenter = logoCenterY - dot.y;
+                const distanceToCenter = Math.sqrt(dxToCenter * dxToCenter + dyToCenter * dyToCenter);
+                
+                if (dot.isFlashParticle && distanceToCenter < LOGO_CLEAR_RADIUS && !dot.isAttractedToCenter && !dot.isBeingConsumed) {
+                    dot.isAttractedToCenter = true;
+                }
+                
+                if (dot.isFlashParticle && dot.isAttractedToCenter && distanceToCenter < BLACK_HOLE_RADIUS && !dot.isBeingConsumed) {
+                    dot.isBeingConsumed = true;
+                    const fadeInterval = setInterval(() => {
+                        const currentOpacity = parseFloat(dot.element.style.opacity);
+                        dot.element.style.opacity = Math.max(0, currentOpacity * 0.8);
+                        
+                        const currentSize = parseFloat(dot.element.style.width);
+                        dot.element.style.width = Math.max(0.1, currentSize * 0.85) + 'px';
+                        dot.element.style.height = Math.max(0.1, currentSize * 0.85) + 'px';
+                        
+                        if (currentOpacity < 0.05 || currentSize < 0.2) {
+                            clearInterval(fadeInterval);
+                            setTimeout(() => {
+                                if (dot.element.parentNode) {
+                                    dot.element.parentNode.removeChild(dot.element);
+                                }
+                            }, 100);
+                        }
+                    }, 50);
+                    return false;
+                }
+                
+                if (dot.isFlashParticle && dot.isAttractedToCenter && !dot.isBeingConsumed) {
+                    const baseStrength = 0.12;
+                    let strength = baseStrength;
+                    
+                    if (distanceToCenter < 100) {
+                        strength = baseStrength * (1 + (100 - distanceToCenter) / 100 * 2);
+                    }
+                    
+                    const angle = Math.atan2(dyToCenter, dxToCenter);
+                    dot.vx += Math.cos(angle) * strength;
+                    dot.vy += Math.sin(angle) * strength;
+                    
+                    let slowdown = 0.99;
+                    
+                    if (distanceToCenter < 150) {
+                        slowdown = 0.97;
+                    }
+                    if (distanceToCenter < 100) {
+                        slowdown = 0.95;
+                    }
+                    if (distanceToCenter < 50) {
+                        slowdown = 0.92;
+                    }
+                    if (distanceToCenter < 30) {
+                        slowdown = 0.88;
+                    }
+                    
+                    dot.vx *= slowdown;
+                    dot.vy *= slowdown;
+                    
+                    if (distanceToCenter < 10 && Math.abs(dot.vx) < 0.5 && Math.abs(dot.vy) < 0.5) {
+                        dot.vx = 0;
+                        dot.vy = 0;
+                        dot.x = logoCenterX;
+                        dot.y = logoCenterY;
+                    }
+                    
+                    if (distanceToCenter < 200) {
+                        const sizeFade = Math.max(0.3, distanceToCenter / 200);
+                        dot.element.style.width = (dot.size * sizeFade) + 'px';
+                        dot.element.style.height = (dot.size * sizeFade) + 'px';
+                    }
+                    
+                    if (distanceToCenter < 150) {
+                        const glowFade = Math.max(0.2, distanceToCenter / 150);
+                        dot.element.style.boxShadow = `0 0 3px 1px rgba(100, 180, 255, ${dot.glowIntensity * 0.6 * glowFade})`;
+                    }
+                    
+                    if (distanceToCenter < 60) {
+                        const fadeFade = Math.max(0.1, distanceToCenter / 60);
+                        dot.element.style.opacity = Math.max(0.1, dot.opacity * fadeFade);
+                    }
+                }
+                
+                if (!dot.isAttractedToCenter && !dot.isBeingConsumed) {
+                    const dxToMouse = mouseX - dot.x;
+                    const dyToMouse = mouseY - dot.y;
+                    const distanceToMouse = Math.sqrt(dxToMouse * dxToMouse + dyToMouse * dyToMouse);
+                    
+                    if (distanceToMouse < ATTRACTION_RADIUS && distanceToMouse > 5) {
+                        const force = (ATTRACTION_RADIUS - distanceToMouse) / ATTRACTION_RADIUS * ATTRACTION_FORCE;
+                        const angle = Math.atan2(dyToMouse, dxToMouse);
+                        
+                        dot.vx += Math.cos(angle) * force * 2.5;
+                        dot.vy += Math.sin(angle) * force * 2.5;
+                    }
+                }
+                
+                if (!dot.isBeingConsumed) {
+                    if (dot.isFlashParticle && !dot.isAttractedToCenter) {
+                        dot.vx *= 0.992;
+                        dot.vy *= 0.992;
+                    } else if (!dot.isFlashParticle) {
+                        dot.vx *= 0.998;
+                        dot.vy *= 0.998;
+                    }
+                }
+                
+                if (!dot.isBeingConsumed) {
+                    dot.x += dot.vx;
+                    dot.y += dot.vy;
+                    
+                    if (dot.x < -100 || dot.x > window.innerWidth + 100 ||
+                        dot.y < -100 || dot.y > window.innerHeight + 100 ||
+                        dot.lifetime > dot.maxLifetime) {
+                        return false;
+                    }
+                    
+                    if (!dot.isAttractedToCenter) {
+                        let edgeOpacity = 1;
+                        if (dot.x < FADE_DISTANCE) edgeOpacity = Math.min(edgeOpacity, dot.x / FADE_DISTANCE);
+                        if (dot.x > window.innerWidth - FADE_DISTANCE) edgeOpacity = Math.min(edgeOpacity, (window.innerWidth - dot.x) / FADE_DISTANCE);
+                        if (dot.y < FADE_DISTANCE) edgeOpacity = Math.min(edgeOpacity, dot.y / FADE_DISTANCE);
+                        if (dot.y > window.innerHeight - FADE_DISTANCE) edgeOpacity = Math.min(edgeOpacity, (window.innerHeight - dot.y) / FADE_DISTANCE);
+                        
+                        if (dot.lifetime > dot.maxLifetime * 0.7) {
+                            const fadeProgress = (dot.maxLifetime - dot.lifetime) / (dot.maxLifetime * 0.3);
+                            edgeOpacity = Math.min(edgeOpacity, Math.max(0.1, fadeProgress));
+                        }
+                        
+                        dot.element.style.opacity = Math.max(0.1, dot.opacity * edgeOpacity);
+                    }
+                    
+                    dot.element.style.transform = `translate3d(${dot.x}px, ${dot.y}px, 0)`;
+                }
+                
+                return true;
+            }
+            
+            // Основной цикл анимации
+            function animate() {
+                const dotsToRemove = [];
+                
+                for (let i = 0; i < dots.length; i++) {
+                    if (!updateDot(dots[i], i)) {
+                        if (dots[i].element.parentNode) {
+                            dots[i].element.parentNode.removeChild(dots[i].element);
+                        }
+                        dotsToRemove.push(i);
+                    }
+                }
+                
+                for (let i = dotsToRemove.length - 1; i >= 0; i--) {
+                    dots.splice(dotsToRemove[i], 1);
+                }
+                
+                const regularDotsCount = dots.filter(d => !d.isFlashParticle).length;
+                if (regularDotsCount < MAX_DOTS) {
+                    const dotsToAdd = Math.min(2, MAX_DOTS - regularDotsCount);
+                    for (let i = 0; i < dotsToAdd; i++) {
+                        dots.push(createRegularDot());
+                    }
+                }
+                
+                animationId = requestAnimationFrame(animate);
+            }
+            
+            // Обработчик изменения размера окна
+            window.addEventListener('resize', () => {
+                logoCenterX = window.innerWidth / 2;
+                logoCenterY = window.innerHeight / 2;
+                
+                dots.forEach(dot => {
+                    if (dot.element.parentNode) {
+                        dot.element.parentNode.removeChild(dot.element);
+                    }
+                });
+                
+                dots.length = 0;
+                initRegularDots();
+            });
+            
+            // Запуск
+            initRegularDots();
+            animate();
+            
+            // Очистка при разгрузке страницы
+            window.addEventListener('beforeunload', () => {
+                if (animationId) {
+                    cancelAnimationFrame(animationId);
+                }
+            });
+        });
+    </script>
 </body>
 </html>
