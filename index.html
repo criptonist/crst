@@ -3,7 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <title>CRIPTONIST</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
+        * {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        
         body {
             background-color: #000;
             margin: 0;
@@ -16,17 +27,33 @@
             position: relative;
             overflow: hidden;
             cursor: default;
+            touch-action: manipulation;
         }
         
         #bg-video {
             position: fixed;
             top: 50%;
             left: 50%;
-            width: 90%;
-            height: 90%;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
             z-index: -2;
             transform: translate(-50%, -50%);
             object-fit: cover;
+            display: block;
+        }
+        
+        #bg-fallback {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('space.jpg') no-repeat center center;
+            background-size: cover;
+            z-index: -3;
+            display: none;
         }
         
         .overlay {
@@ -35,7 +62,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.3);
+            background-color: rgba(0, 0, 0, 0.2);
             z-index: -1;
         }
         
@@ -46,6 +73,8 @@
             width: 100%;
             position: relative;
             z-index: 1;
+            padding: 20px;
+            box-sizing: border-box;
         }
         
         .row {
@@ -53,37 +82,42 @@
             justify-content: center;
             align-items: center;
             width: 100%;
+            flex-wrap: wrap;
         }
         
         .image-container {
             width: 18%;
+            max-width: 300px;
             text-align: center;
             position: relative;
             min-height: 100px;
             z-index: 10;
+            margin: 0;
         }
         
         .logo-img {
-            width: 30%;
-            max-width: 400px;
+            width: 100%;
+            max-width: 120px;
             height: auto;
             display: block;
             margin: 0 auto;
             transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
-            filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.5)); /* Свечение как у текста */
+            filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.5));
         }
         
         .text-left, .text-right {
             width: 30%;
             color: #ccc;
-            font-size: 28px;
+            font-size: 32px;
             text-align: center;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+            padding: 0 20px;
+            box-sizing: border-box;
         }
         
         .percentage-text {
-            width: 30%;
+            width: 100%;
             max-width: 400px;
             height: auto;
             margin: 0 auto;
@@ -91,7 +125,7 @@
             color: #ddd;
             text-align: center;
             font-weight: bold;
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
             opacity: 0;
             transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
@@ -118,14 +152,14 @@
         }
         
         .percentage-sign {
-            font-size: 26px; /* Уменьшили размер знака процента */
+            font-size: 26px;
             align-self: flex-start;
             margin-top: 10px;
         }
         
         .logo-img.hidden {
             opacity: 0;
-            transform: scale(0.8); /* Убрал rotate(-5deg) */
+            transform: scale(0.8);
             pointer-events: none;
         }
         
@@ -136,6 +170,8 @@
             z-index: 0;
             will-change: transform, opacity;
             transform: translate3d(0, 0, 0);
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
         }
         
         .flash {
@@ -172,13 +208,52 @@
             pointer-events: none;
             z-index: 0;
         }
+        
+        /* Сообщение для мобильных устройств */
+        #mobile-message {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            color: white;
+            font-size: 16px;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            z-index: 1000;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            box-sizing: border-box;
+            margin: 0;
+        }
+        
+        /* Показываем сообщение только на мобильных устройствах */
+        @media (max-width: 1023px) {
+            body > *:not(#mobile-message) {
+                display: none !important;
+            }
+            
+            #mobile-message {
+                display: flex;
+            }
+        }
     </style>
 </head>
 <body>
-    <video id="bg-video" autoplay muted loop>
+    <!-- Сообщение для мобильных устройств -->
+    <div id="mobile-message">
+        ONLY FOR WEB
+    </div>
+    
+    <video id="bg-video" autoplay muted loop playsinline webkit-playsinline>
         <source src="space.mp4" type="video/mp4">
         Ваш браузер не поддерживает видео.
     </video>
+    
+    <div id="bg-fallback"></div>
     
     <div class="overlay"></div>
     
@@ -199,14 +274,47 @@
     </div>
     
     <script>
+        // Проверяем, является ли устройство мобильным
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const isTablet = /iPad|Android(?!.*Mobile)|Tablet|Silk/i.test(navigator.userAgent);
+        
+        // Если это мобильное устройство или планшет, останавливаем выполнение остального кода
+        if (isMobile || isTablet) {
+            // Останавливаем выполнение скрипта для мобильных устройств
+            throw new Error("Mobile version not supported");
+        }
+        
         document.addEventListener('DOMContentLoaded', function() {
             const video = document.getElementById('bg-video');
+            const bgFallback = document.getElementById('bg-fallback');
+            
+            // Настройки для десктопов
             video.playbackRate = 0.7;
-            video.play().catch(() => {});
+            
+            // Попытка воспроизвести видео
+            const playVideo = () => {
+                const promise = video.play();
+                if (promise !== undefined) {
+                    promise.catch(() => {
+                        // Если видео не может воспроизвестись, показываем фоновое изображение
+                        video.style.display = 'none';
+                        bgFallback.style.display = 'block';
+                    });
+                }
+            };
+            
+            // Запуск видео после жеста пользователя
+            document.addEventListener('touchstart', function initVideo() {
+                playVideo();
+                document.removeEventListener('touchstart', initVideo);
+            }, { once: true });
+            
+            // Также пытаемся запустить сразу
+            playVideo();
             
             video.addEventListener('error', function() {
-                document.body.style.background = 'url(space.jpg) no-repeat center center fixed';
-                document.body.style.backgroundSize = 'cover';
+                video.style.display = 'none';
+                bgFallback.style.display = 'block';
             });
             
             // Элементы логотипа и текста
@@ -217,8 +325,9 @@
             let isLogoVisible = true;
             let isAnimating = false;
             
-            // Обработчик клика на логотип
-            logo.addEventListener('click', function(e) {
+            // Обработчик клика/тапа на логотип
+            const handleLogoClick = function(e) {
+                e.preventDefault();
                 e.stopPropagation();
                 
                 if (!isLogoVisible || isAnimating) return;
@@ -234,10 +343,11 @@
                     percentageText.classList.add('active');
                     isAnimating = false;
                 }, 300);
-            });
+            };
             
-            // Обработчик клика на текст
-            percentageText.addEventListener('click', function(e) {
+            // Обработчик клика/тапа на текст
+            const handleTextClick = function(e) {
+                e.preventDefault();
                 e.stopPropagation();
                 
                 if (isLogoVisible || isAnimating) return;
@@ -253,22 +363,29 @@
                     logo.classList.remove('hidden');
                     isAnimating = false;
                 }, 300);
-            });
+            };
             
-            // Параметры
+            // Добавляем обработчики
+            logo.addEventListener('click', handleLogoClick);
+            logo.addEventListener('touchstart', handleLogoClick);
+            
+            percentageText.addEventListener('click', handleTextClick);
+            percentageText.addEventListener('touchstart', handleTextClick);
+            
+            // Параметры для десктопов
             const MAX_DOTS = 400;
             const ATTRACTION_RADIUS = 100;
             const ATTRACTION_FORCE = 0.11;
             const LOGO_CLEAR_RADIUS = 460;
-            const FADE_DISTANCE = 50;
+            const FADE_DISTANCE = 30;
             const FLASH_PARTICLES_COUNT = 25;
-            const BLACK_HOLE_RADIUS = 20;
+            const BLACK_HOLE_RADIUS = 15;
             
             // Центр экрана
             let logoCenterX = window.innerWidth / 2;
             let logoCenterY = window.innerHeight / 2;
             
-            // Позиция мыши
+            // Позиция касания/мыши
             let mouseX = logoCenterX;
             let mouseY = logoCenterY;
             
@@ -309,7 +426,7 @@
                 
                 const glowIntensity = 0.4 + Math.random() * 0.6;
                 particle.style.background = 'white';
-                particle.style.boxShadow = `0 0 3px 1px rgba(100, 180, 255, ${glowIntensity * 0.6})`;
+                particle.style.boxShadow = `0 0 2px 1px rgba(100, 180, 255, ${glowIntensity * 0.6})`;
                 particle.style.opacity = '0.9';
                 
                 dotsContainer.appendChild(particle);
@@ -326,7 +443,7 @@
                     size: size,
                     opacity: 0.7,
                     lifetime: 0,
-                    maxLifetime: 20 + Math.random() * 10,
+                    maxLifetime: 15 + Math.random() * 8,
                     isFlashParticle: true,
                     glowIntensity: glowIntensity,
                     isAttractedToCenter: false,
@@ -359,7 +476,7 @@
                 dotElement.style.background = 'white';
                 
                 if (Math.random() > 0.8) {
-                    dotElement.style.boxShadow = '0 0 3px 1px rgba(255, 255, 255, 0.3)';
+                    dotElement.style.boxShadow = '0 0 2px 1px rgba(255, 255, 255, 0.3)';
                 }
                 
                 dotsContainer.appendChild(dotElement);
@@ -373,7 +490,7 @@
                     size: size,
                     opacity: opacity,
                     lifetime: 0,
-                    maxLifetime: 8 + Math.random() * 4,
+                    maxLifetime: 6 + Math.random() * 3,
                     isFlashParticle: false,
                     isAttractedToCenter: false,
                     isBeingConsumed: false
@@ -398,7 +515,7 @@
                 }
             });
             
-            // Обработчик движения мыши
+            // Обработчик движения мыши для десктопа
             document.addEventListener('mousemove', (e) => {
                 mouseX = e.clientX;
                 mouseY = e.clientY;
@@ -439,11 +556,11 @@
                 }
                 
                 if (dot.isFlashParticle && dot.isAttractedToCenter && !dot.isBeingConsumed) {
-                    const baseStrength = 0.12;
+                    const baseStrength = 0.1;
                     let strength = baseStrength;
                     
-                    if (distanceToCenter < 100) {
-                        strength = baseStrength * (1 + (100 - distanceToCenter) / 100 * 2);
+                    if (distanceToCenter < 80) {
+                        strength = baseStrength * (1 + (80 - distanceToCenter) / 80 * 2);
                     }
                     
                     const angle = Math.atan2(dyToCenter, dxToCenter);
@@ -452,42 +569,42 @@
                     
                     let slowdown = 0.99;
                     
-                    if (distanceToCenter < 150) {
+                    if (distanceToCenter < 120) {
                         slowdown = 0.97;
                     }
-                    if (distanceToCenter < 100) {
+                    if (distanceToCenter < 80) {
                         slowdown = 0.95;
                     }
-                    if (distanceToCenter < 50) {
+                    if (distanceToCenter < 40) {
                         slowdown = 0.92;
                     }
-                    if (distanceToCenter < 30) {
+                    if (distanceToCenter < 25) {
                         slowdown = 0.88;
                     }
                     
                     dot.vx *= slowdown;
                     dot.vy *= slowdown;
                     
-                    if (distanceToCenter < 10 && Math.abs(dot.vx) < 0.5 && Math.abs(dot.vy) < 0.5) {
+                    if (distanceToCenter < 8 && Math.abs(dot.vx) < 0.3 && Math.abs(dot.vy) < 0.3) {
                         dot.vx = 0;
                         dot.vy = 0;
                         dot.x = logoCenterX;
                         dot.y = logoCenterY;
                     }
                     
-                    if (distanceToCenter < 200) {
-                        const sizeFade = Math.max(0.3, distanceToCenter / 200);
+                    if (distanceToCenter < 150) {
+                        const sizeFade = Math.max(0.3, distanceToCenter / 150);
                         dot.element.style.width = (dot.size * sizeFade) + 'px';
                         dot.element.style.height = (dot.size * sizeFade) + 'px';
                     }
                     
-                    if (distanceToCenter < 150) {
-                        const glowFade = Math.max(0.2, distanceToCenter / 150);
-                        dot.element.style.boxShadow = `0 0 3px 1px rgba(100, 180, 255, ${dot.glowIntensity * 0.6 * glowFade})`;
+                    if (distanceToCenter < 120) {
+                        const glowFade = Math.max(0.2, distanceToCenter / 120);
+                        dot.element.style.boxShadow = `0 0 2px 1px rgba(100, 180, 255, ${dot.glowIntensity * 0.6 * glowFade})`;
                     }
                     
-                    if (distanceToCenter < 60) {
-                        const fadeFade = Math.max(0.1, distanceToCenter / 60);
+                    if (distanceToCenter < 50) {
+                        const fadeFade = Math.max(0.1, distanceToCenter / 50);
                         dot.element.style.opacity = Math.max(0.1, dot.opacity * fadeFade);
                     }
                 }
@@ -501,8 +618,8 @@
                         const force = (ATTRACTION_RADIUS - distanceToMouse) / ATTRACTION_RADIUS * ATTRACTION_FORCE;
                         const angle = Math.atan2(dyToMouse, dxToMouse);
                         
-                        dot.vx += Math.cos(angle) * force * 2.5;
-                        dot.vy += Math.sin(angle) * force * 2.5;
+                        dot.vx += Math.cos(angle) * force * 2.0;
+                        dot.vy += Math.sin(angle) * force * 2.0;
                     }
                 }
                 
@@ -520,8 +637,8 @@
                     dot.x += dot.vx;
                     dot.y += dot.vy;
                     
-                    if (dot.x < -100 || dot.x > window.innerWidth + 100 ||
-                        dot.y < -100 || dot.y > window.innerHeight + 100 ||
+                    if (dot.x < -50 || dot.x > window.innerWidth + 50 ||
+                        dot.y < -50 || dot.y > window.innerHeight + 50 ||
                         dot.lifetime > dot.maxLifetime) {
                         return false;
                     }
@@ -576,7 +693,7 @@
             }
             
             // Обработчик изменения размера окна
-            window.addEventListener('resize', () => {
+            function handleResize() {
                 logoCenterX = window.innerWidth / 2;
                 logoCenterY = window.innerHeight / 2;
                 
@@ -588,7 +705,9 @@
                 
                 dots.length = 0;
                 initRegularDots();
-            });
+            }
+            
+            window.addEventListener('resize', handleResize);
             
             // Запуск
             initRegularDots();
@@ -599,6 +718,12 @@
                 if (animationId) {
                     cancelAnimationFrame(animationId);
                 }
+            });
+            
+            // Инициализация после полной загрузки
+            window.addEventListener('load', () => {
+                // Повторная попытка запустить видео
+                playVideo();
             });
         });
     </script>
