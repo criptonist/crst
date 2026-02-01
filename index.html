@@ -1,731 +1,457 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>CRIPTONIST</title>
-    <link rel="icon" href="https://criptonist.github.io/crst/favicon.ico" type="image/x-icon">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <style>
-        * {
-            -webkit-tap-highlight-color: transparent;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-        }
-        
-        body {
-            background-color: #000;
-            margin: 0;
-            padding: 0;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: Arial, sans-serif;
-            position: relative;
-            overflow: hidden;
-            cursor: default;
-            touch-action: manipulation;
-        }
-        
-        #bg-video {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            min-width: 100%;
-            min-height: 100%;
-            width: auto;
-            height: auto;
-            z-index: -2;
-            transform: translate(-50%, -50%);
-            object-fit: cover;
-            display: block;
-        }
-        
-        #bg-fallback {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: url('space.jpg') no-repeat center center;
-            background-size: cover;
-            z-index: -3;
-            display: none;
-        }
-        
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.2);
-            z-index: -1;
-        }
-        
-        .container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-            position: relative;
-            z-index: 1;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-        
-        .row {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 100%;
-            flex-wrap: wrap;
-        }
-        
-        .image-container {
-            width: 18%;
-            max-width: 300px;
-            text-align: center;
-            position: relative;
-            min-height: 100px;
-            z-index: 10;
-            margin: 0;
-        }
-        
-        .logo-img {
-            width: 100%;
-            max-width: 120px;
-            height: auto;
-            display: block;
-            margin: 0 auto;
-            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-            cursor: pointer;
-            filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.5));
-        }
-        
-        .text-left, .text-right {
-            width: 30%;
-            color: #ccc;
-            font-size: 32px;
-            text-align: center;
-            text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
-            padding: 0 20px;
-            box-sizing: border-box;
-        }
-        
-        .percentage-text {
-            width: 100%;
-            max-width: 400px;
-            height: auto;
-            margin: 0 auto;
-            font-size: 72px;
-            color: #ddd;
-            text-align: center;
-            font-weight: bold;
-            text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
-            opacity: 0;
-            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-            cursor: pointer;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0.9);
-            pointer-events: none;
-            z-index: 11;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
-        }
-        
-        .percentage-text.active {
-            pointer-events: auto;
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
-        }
-        
-        .percentage-number {
-            font-size: 52px;
-        }
-        
-        .percentage-sign {
-            font-size: 26px;
-            align-self: flex-start;
-            margin-top: 10px;
-        }
-        
-        .logo-img.hidden {
-            opacity: 0;
-            transform: scale(0.8);
-            pointer-events: none;
-        }
-        
-        .dot {
-            position: absolute;
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 0;
-            will-change: transform, opacity;
-            transform: translate3d(0, 0, 0);
-            backface-visibility: hidden;
-            -webkit-backface-visibility: hidden;
-        }
-        
-        .flash {
-            position: absolute;
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 5;
-            transform: translate(-50%, -50%);
-            animation: flashEffect 0.2s ease-out forwards;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0) 70%);
-        }
-        
-        @keyframes flashEffect {
-            0% {
-                opacity: 0;
-                transform: translate(-50%, -50%) scale(0);
-            }
-            50% {
-                opacity: 1;
-                transform: translate(-50%, -50%) scale(1.1);
-            }
-            100% {
-                opacity: 0;
-                transform: translate(-50%, -50%) scale(1.6);
-            }
-        }
-        
-        #dots-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0;
-        }
-        
-        /* Сообщение для мобильных устройств */
-        #mobile-message {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #000;
-            color: white;
-            font-size: 16px;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            z-index: 1000;
-            font-family: Arial, sans-serif;
-            padding: 20px;
-            box-sizing: border-box;
-            margin: 0;
-        }
-        
-        /* Показываем сообщение только на мобильных устройствах */
-        @media (max-width: 1023px) {
-            body > *:not(#mobile-message) {
-                display: none !important;
-            }
-            
-            #mobile-message {
-                display: flex;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<title>CRIPTONIST</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400&display=swap" rel="stylesheet">
+
+<style>
+*{box-sizing:border-box;user-select:none;}
+
+body{
+    margin:0;
+    background:#000;
+    color: #00bb00;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:flex-start;
+    font-family:Arial,sans-serif;
+}
+
+/* ===== LAYOUT ===== */
+.container{
+    display:flex;
+    align-items:center;
+    justify-content:flex-start;
+    gap:140px;
+    padding-left:80px;
+    width:100%;
+}
+
+/* ===== TIMER ===== */
+@font-face{
+    font-family:'digital-7';
+    src:url('digital-7.ttf');
+}
+
+.timer-wrapper{
+    position:relative;
+}
+
+main.clock-display.elapsed-timer{
+    display:flex;
+    align-items:flex-end;
+    gap:0;
+    font-family:'digital-7',sans-serif;
+    transition:transform 1600ms ease;
+}
+
+/* таймер опускается */
+.timer-wrapper.text-mode main.clock-display.elapsed-timer{
+    transform:translateY(90px);
+}
+
+.elapsed-timer .block{
+    width:160px;
+    display:flex;
+    flex-direction:column;
+    align-items:center; /* ГЛАВНЫЙ ЦЕНТР */
+}
+
+.elapsed-timer .num{
+    position:relative;
+    width:100%;
+    font-variant-numeric: tabular-nums;
+    font-size:110px;
+    line-height:1;
+    text-align:center;
+    display:block;              /* ВАЖНО: не flex */
+}
+
+/* серый фон под цифрами */
+.elapsed-timer .num::before{
+    content:"88";
+    position:absolute;
+    inset:0;
+    color:#002200;
+    pointer-events:none;
+    z-index:0;
+    display:block;              /* ВАЖНО: не flex */
+    text-align:center;
+}
+
+/* индивидуальные фоны */
+.elapsed-timer .years::before{ content:"8"; }
+.elapsed-timer .months::before{ content:"88"; }
+.elapsed-timer .days::before{ content:"88"; }
+.elapsed-timer .hours::before{ content:"88"; }
+.elapsed-timer .minutes::before{ content:"88"; }
+.elapsed-timer .seconds::before{ content:"88"; }
+
+/* реальные цифры */
+.elapsed-timer .num .fg{
+    position:relative;
+    z-index:1;
+    display:block;
+    text-align:center;
+}
+
+.elapsed-timer .months{
+  display:block;
+  text-align:center;
+}
+
+
+.elapsed-timer .months::before{
+  content:"88";
+  position:absolute;
+  inset:0;
+  color:#002200;
+  z-index:0;
+  display:block;
+  width:2ch;
+  margin:0 auto;
+  text-align:right;
+}
+
+.elapsed-timer .months .fg{
+  position:relative;
+  z-index:1;
+  display:block;
+  width:2ch;
+  margin:0 auto;
+  text-align:right;
+}
+
+/* подписи */
+.elapsed-timer .label{
+    margin-top:8px;
+    font-size:12px;
+    letter-spacing:0.15em;
+    opacity:.75;
+    text-transform:uppercase;
+    width:100%;
+    text-align:center;
+}
+
+
+/* ===== TEXT REPLACEMENT ===== */
+.timer-replacement{
+    position:absolute;
+    left:0;
+    right:0;
+    top:-150px;
+    margin:0 auto;
+    width:900px;
+    opacity:0;
+    transform:translateY(20px);
+    transition:opacity 600ms ease, transform 600ms ease;
+    pointer-events:none;
+    font-family:'Inter', sans-serif;
+    font-size:18px;
+    letter-spacing:.06em;
+    font-weight:200;
+    line-height:1.4;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    white-space:normal;
+    overflow-wrap:break-word;
+    text-align:justify;
+}
+
+.timer-replacement::after{
+    content:"";
+    display:inline-block;
+    width:100%;
+}
+
+.timer-wrapper.text-shown .timer-replacement{
+    opacity:1;
+    transform:translateY(0);
+    pointer-events:auto;
+}
+
+
+
+/* показываем текст только после окончания анимации (класс text-shown) */
+.timer-wrapper.text-shown .timer-replacement{
+    opacity:1;
+    transform:translateY(0);
+    pointer-events:auto;
+}
+
+/* ===== LOGO / 98% ===== */
+.image-container{
+    position:relative;
+    width:220px;
+    height:220px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin-left:180px;
+}
+
+.logo-img{
+    width:100%;
+    max-width:240px;
+    cursor:pointer;
+    transition:opacity 1600ms ease, transform 1600ms ease; /* 800 -> 1600 */
+}
+
+.logo-img.hidden{
+    opacity:0;
+    transform:scale(.85);
+    pointer-events:none;
+}
+
+.percentage-text{
+    position: absolute;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+
+    font-size: 60px;          /* ← шрифт */
+    font-weight: bold;
+    text-align: center;       /* ← выравнивание текста */
+
+    white-space: normal;
+    overflow-wrap: break-word;
+
+    cursor: pointer;
+    opacity: 0;
+    transform: scale(.9);
+    transition: opacity 600ms ease, transform 600ms ease;
+    pointer-events: none;
+}
+
+.percentage-text.active {
+    opacity: 1;
+    max-width: 100%;
+    font-size: 60px;
+    transform: scale(1);
+    pointer-events: auto;
+    text-align: center;
+    white-space: normal;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.percentage-label{
+    position: absolute;
+    transform: translateX(-260px);
+    width: 500px;
+    top: -160px;
+
+    display: block;
+    white-space: normal;
+    overflow-wrap: break-word;
+}
+
+.percentage-number{
+    font-size:120px;
+    position:relative;
+    top:-12px;   /* подбирай значение */
+}
+
+.percentage-sign{font-size:52px;margin-top:20px;}
+
+@media (max-width: 768px){
+
+    /* скрываем всё кроме таймера */
+    .image-container,
+    .timer-replacement {
+        display: none !important;
+    }
+
+    body{
+        justify-content: center;
+    }
+
+    .container{
+        padding: 0;
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* вертикальный таймер */
+    main.clock-display.elapsed-timer{
+        flex-direction: column;
+        align-items: center;
+        transform: none !important;
+    }
+
+    .elapsed-timer .block{
+        width: auto;
+    }
+
+    .elapsed-timer .num{
+        font-size: 80px;
+    }
+
+    .elapsed-timer .label{
+        font-size: 10px;
+        margin-bottom: 12px;
+    }
+}
+
+</style>
 </head>
+
 <body>
-    <!-- Сообщение для мобильных устройств -->
-    <div id="mobile-message">
-        ONLY FOR WEB
-    </div>
-    
-    <video id="bg-video" autoplay muted loop playsinline webkit-playsinline>
-        <source src="space.mp4" type="video/mp4">
-        Ваш браузер не поддерживает видео.
-    </video>
-    
-    <div id="bg-fallback"></div>
-    
-    <div class="overlay"></div>
-    
-    <div id="dots-container"></div>
-    
-    <div class="container">
-        <div class="row">
-            <div class="text-left"></div>
-            <div class="image-container">
-                <img src="logo.png" alt="Logo" class="logo-img" id="logo">
-                <div class="percentage-text" id="percentageText">
-                    <span class="percentage-number">98</span>
-                    <span class="percentage-sign">%</span>
+
+<div class="container">
+
+    <!-- TIMER + TEXT -->
+    <div class="timer-wrapper" id="timerWrapper">
+
+        <div class="timer-replacement" id="timerText">
+            <div>21, 2021, I began studying the secp256k1 curve for vulnerabilities, as no one had proven otherwise. My goal is simple, yet very challenging: to derive a private key from any XY coordinate at any given moment, thereby solving ECDLP in polynomial time. This is not the death of Bitcoin, but it does mean it has unprecedented power to influence the crypto market and the world as a whole. One day, the timer will disappear...</div>
+        </div>
+
+        <main class="clock-display elapsed-timer" id="timer">
+
+            <div class="block">
+                <div class="num years">
+                    <span class="fg">0</span>
                 </div>
+                <div class="label">YEAR</div>
             </div>
-            <div class="text-right"></div>
+
+            <div class="block">
+                <div class="num months">
+                    <span class="fg">00</span>
+                </div>
+                <div class="label">MONTH</div>
+            </div>
+
+            <div class="block">
+                <div class="num days">
+                    <span class="fg">00</span>
+                </div>
+                <div class="label">DAY</div>
+            </div>
+
+            <div class="block">
+                <div class="num hours">
+                    <span class="fg">00</span>
+                </div>
+                <div class="label">HOURS</div>
+            </div>
+
+            <div class="block">
+                <div class="num minutes">
+                    <span class="fg">00</span>
+                </div>
+                <div class="label">MINUTES</div>
+            </div>
+
+            <div class="block">
+                <div class="num seconds">
+                    <span class="fg">00</span>
+                </div>
+                <div class="label">SECONDS</div>
+            </div>
+
+        </main>
+
+
+    </div>
+
+    <!-- LOGO / 98% -->
+    <div class="image-container">
+        <img src="logo.png" class="logo-img" id="logo" alt="logo">
+        <div class="percentage-text" id="percentageText">
+            <span class="percentage-label">Curve hack complete on</br>
+            <span class="percentage-number">98%</span>
         </div>
     </div>
-    
-    <script>
-        // Проверяем, является ли устройство мобильным
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        const isTablet = /iPad|Android(?!.*Mobile)|Tablet|Silk/i.test(navigator.userAgent);
-        
-        // Если это мобильное устройство или планшет, останавливаем выполнение остального кода
-        if (isMobile || isTablet) {
-            // Останавливаем выполнение скрипта для мобильных устройств
-            throw new Error("Mobile version not supported");
-        }
-        
-        document.addEventListener('DOMContentLoaded', function() {
-            const video = document.getElementById('bg-video');
-            const bgFallback = document.getElementById('bg-fallback');
-            
-            // Настройки для десктопов
-            video.playbackRate = 0.7;
-            
-            // Попытка воспроизвести видео
-            const playVideo = () => {
-                const promise = video.play();
-                if (promise !== undefined) {
-                    promise.catch(() => {
-                        // Если видео не может воспроизвестись, показываем фоновое изображение
-                        video.style.display = 'none';
-                        bgFallback.style.display = 'block';
-                    });
-                }
-            };
-            
-            // Запуск видео после жеста пользователя
-            document.addEventListener('touchstart', function initVideo() {
-                playVideo();
-                document.removeEventListener('touchstart', initVideo);
-            }, { once: true });
-            
-            // Также пытаемся запустить сразу
-            playVideo();
-            
-            video.addEventListener('error', function() {
-                video.style.display = 'none';
-                bgFallback.style.display = 'block';
-            });
-            
-            // Элементы логотипа и текста
-            const logo = document.getElementById('logo');
-            const percentageText = document.getElementById('percentageText');
-            
-            // Флаг для отслеживания состояния
-            let isLogoVisible = true;
-            let isAnimating = false;
-            
-            // Обработчик клика/тапа на логотип
-            const handleLogoClick = function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                if (!isLogoVisible || isAnimating) return;
-                
-                isAnimating = true;
-                isLogoVisible = false;
-                
-                // Плавное исчезновение логотипа
-                logo.classList.add('hidden');
-                
-                // Плавное появление текста с небольшой задержкой
-                setTimeout(() => {
-                    percentageText.classList.add('active');
-                    isAnimating = false;
-                }, 300);
-            };
-            
-            // Обработчик клика/тапа на текст
-            const handleTextClick = function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                if (isLogoVisible || isAnimating) return;
-                
-                isAnimating = true;
-                isLogoVisible = true;
-                
-                // Плавное исчезновение текста
-                percentageText.classList.remove('active');
-                
-                // Плавное появление логотипа с небольшой задержкой
-                setTimeout(() => {
-                    logo.classList.remove('hidden');
-                    isAnimating = false;
-                }, 300);
-            };
-            
-            // Добавляем обработчики
-            logo.addEventListener('click', handleLogoClick);
-            logo.addEventListener('touchstart', handleLogoClick);
-            
-            percentageText.addEventListener('click', handleTextClick);
-            percentageText.addEventListener('touchstart', handleTextClick);
-            
-            // Параметры для десктопов
-            const MAX_DOTS = 400;
-            const ATTRACTION_RADIUS = 100;
-            const ATTRACTION_FORCE = 0.11;
-            const LOGO_CLEAR_RADIUS = 460;
-            const FADE_DISTANCE = 30;
-            const FLASH_PARTICLES_COUNT = 25;
-            const BLACK_HOLE_RADIUS = 15;
-            
-            // Центр экрана
-            let logoCenterX = window.innerWidth / 2;
-            let logoCenterY = window.innerHeight / 2;
-            
-            // Позиция касания/мыши
-            let mouseX = logoCenterX;
-            let mouseY = logoCenterY;
-            
-            const dotsContainer = document.getElementById('dots-container');
-            const dots = [];
-            let animationId;
-            
-            // Функция создания вспышки
-            function createFlash(x, y) {
-                const whiteFlash = document.createElement('div');
-                whiteFlash.className = 'flash';
-                whiteFlash.style.left = x + 'px';
-                whiteFlash.style.top = y + 'px';
-                whiteFlash.style.width = '0px';
-                whiteFlash.style.height = '0px';
-                
-                document.body.appendChild(whiteFlash);
-                
-                setTimeout(() => {
-                    if (whiteFlash.parentNode) {
-                        whiteFlash.parentNode.removeChild(whiteFlash);
-                    }
-                }, 200);
-                
-                for (let i = 0; i < FLASH_PARTICLES_COUNT; i++) {
-                    createFlashParticle(x, y);
-                }
-            }
-            
-            // Функция создания точки от вспышки
-            function createFlashParticle(x, y) {
-                const particle = document.createElement('div');
-                particle.className = 'dot';
-                
-                const size = 1.5 + Math.random() * 2.5;
-                particle.style.width = size + 'px';
-                particle.style.height = size + 'px';
-                
-                const glowIntensity = 0.4 + Math.random() * 0.6;
-                particle.style.background = 'white';
-                particle.style.boxShadow = `0 0 2px 1px rgba(100, 180, 255, ${glowIntensity * 0.6})`;
-                particle.style.opacity = '0.9';
-                
-                dotsContainer.appendChild(particle);
-                
-                const angle = Math.random() * Math.PI * 2;
-                const speed = 2 + Math.random() * 1.5;
-                
-                const particleObj = {
-                    element: particle,
-                    x: x,
-                    y: y,
-                    vx: Math.cos(angle) * speed,
-                    vy: Math.sin(angle) * speed,
-                    size: size,
-                    opacity: 0.7,
-                    lifetime: 0,
-                    maxLifetime: 15 + Math.random() * 8,
-                    isFlashParticle: true,
-                    glowIntensity: glowIntensity,
-                    isAttractedToCenter: false,
-                    isBeingConsumed: false
-                };
-                
-                dots.push(particleObj);
-                return particleObj;
-            }
-            
-            // Функция создания обычной точки
-            function createRegularDot() {
-                const angle = Math.random() * Math.PI * 2;
-                const x = logoCenterX + Math.cos(angle) * LOGO_CLEAR_RADIUS;
-                const y = logoCenterY + Math.sin(angle) * LOGO_CLEAR_RADIUS;
-                
-                const dirFromCenterX = Math.cos(angle);
-                const dirFromCenterY = Math.sin(angle);
-                const speed = 0.5 + Math.random() * 0.4;
-                
-                const dotElement = document.createElement('div');
-                dotElement.className = 'dot';
-                
-                const size = 1 + Math.random() * 2;
-                dotElement.style.width = size + 'px';
-                dotElement.style.height = size + 'px';
-                
-                const opacity = 0.4 + Math.random() * 0.3;
-                dotElement.style.opacity = opacity;
-                dotElement.style.background = 'white';
-                
-                if (Math.random() > 0.8) {
-                    dotElement.style.boxShadow = '0 0 2px 1px rgba(255, 255, 255, 0.3)';
-                }
-                
-                dotsContainer.appendChild(dotElement);
-                
-                return {
-                    element: dotElement,
-                    x: x,
-                    y: y,
-                    vx: dirFromCenterX * speed,
-                    vy: dirFromCenterY * speed,
-                    size: size,
-                    opacity: opacity,
-                    lifetime: 0,
-                    maxLifetime: 6 + Math.random() * 3,
-                    isFlashParticle: false,
-                    isAttractedToCenter: false,
-                    isBeingConsumed: false
-                };
-            }
-            
-            // Инициализация обычных точек
-            function initRegularDots() {
-                for (let i = 0; i < MAX_DOTS; i++) {
-                    dots.push(createRegularDot());
-                }
-            }
-            
-            // Обработчик клика по всему документу
-            document.addEventListener('click', (e) => {
-                // Проверяем, не кликнули ли на логотип или текст
-                const isLogoClick = e.target === logo || logo.contains(e.target);
-                const isTextClick = e.target === percentageText || percentageText.contains(e.target);
-                
-                if (!isLogoClick && !isTextClick) {
-                    createFlash(e.clientX, e.clientY);
-                }
-            });
-            
-            // Обработчик движения мыши для десктопа
-            document.addEventListener('mousemove', (e) => {
-                mouseX = e.clientX;
-                mouseY = e.clientY;
-            });
-            
-            // Функция обновления точки
-            function updateDot(dot, index) {
-                dot.lifetime += 0.016;
-                
-                const dxToCenter = logoCenterX - dot.x;
-                const dyToCenter = logoCenterY - dot.y;
-                const distanceToCenter = Math.sqrt(dxToCenter * dxToCenter + dyToCenter * dyToCenter);
-                
-                if (dot.isFlashParticle && distanceToCenter < LOGO_CLEAR_RADIUS && !dot.isAttractedToCenter && !dot.isBeingConsumed) {
-                    dot.isAttractedToCenter = true;
-                }
-                
-                if (dot.isFlashParticle && dot.isAttractedToCenter && distanceToCenter < BLACK_HOLE_RADIUS && !dot.isBeingConsumed) {
-                    dot.isBeingConsumed = true;
-                    const fadeInterval = setInterval(() => {
-                        const currentOpacity = parseFloat(dot.element.style.opacity);
-                        dot.element.style.opacity = Math.max(0, currentOpacity * 0.8);
-                        
-                        const currentSize = parseFloat(dot.element.style.width);
-                        dot.element.style.width = Math.max(0.1, currentSize * 0.85) + 'px';
-                        dot.element.style.height = Math.max(0.1, currentSize * 0.85) + 'px';
-                        
-                        if (currentOpacity < 0.05 || currentSize < 0.2) {
-                            clearInterval(fadeInterval);
-                            setTimeout(() => {
-                                if (dot.element.parentNode) {
-                                    dot.element.parentNode.removeChild(dot.element);
-                                }
-                            }, 100);
-                        }
-                    }, 50);
-                    return false;
-                }
-                
-                if (dot.isFlashParticle && dot.isAttractedToCenter && !dot.isBeingConsumed) {
-                    const baseStrength = 0.1;
-                    let strength = baseStrength;
-                    
-                    if (distanceToCenter < 80) {
-                        strength = baseStrength * (1 + (80 - distanceToCenter) / 80 * 2);
-                    }
-                    
-                    const angle = Math.atan2(dyToCenter, dxToCenter);
-                    dot.vx += Math.cos(angle) * strength;
-                    dot.vy += Math.sin(angle) * strength;
-                    
-                    let slowdown = 0.99;
-                    
-                    if (distanceToCenter < 120) {
-                        slowdown = 0.97;
-                    }
-                    if (distanceToCenter < 80) {
-                        slowdown = 0.95;
-                    }
-                    if (distanceToCenter < 40) {
-                        slowdown = 0.92;
-                    }
-                    if (distanceToCenter < 25) {
-                        slowdown = 0.88;
-                    }
-                    
-                    dot.vx *= slowdown;
-                    dot.vy *= slowdown;
-                    
-                    if (distanceToCenter < 8 && Math.abs(dot.vx) < 0.3 && Math.abs(dot.vy) < 0.3) {
-                        dot.vx = 0;
-                        dot.vy = 0;
-                        dot.x = logoCenterX;
-                        dot.y = logoCenterY;
-                    }
-                    
-                    if (distanceToCenter < 150) {
-                        const sizeFade = Math.max(0.3, distanceToCenter / 150);
-                        dot.element.style.width = (dot.size * sizeFade) + 'px';
-                        dot.element.style.height = (dot.size * sizeFade) + 'px';
-                    }
-                    
-                    if (distanceToCenter < 120) {
-                        const glowFade = Math.max(0.2, distanceToCenter / 120);
-                        dot.element.style.boxShadow = `0 0 2px 1px rgba(100, 180, 255, ${dot.glowIntensity * 0.6 * glowFade})`;
-                    }
-                    
-                    if (distanceToCenter < 50) {
-                        const fadeFade = Math.max(0.1, distanceToCenter / 50);
-                        dot.element.style.opacity = Math.max(0.1, dot.opacity * fadeFade);
-                    }
-                }
-                
-                if (!dot.isAttractedToCenter && !dot.isBeingConsumed) {
-                    const dxToMouse = mouseX - dot.x;
-                    const dyToMouse = mouseY - dot.y;
-                    const distanceToMouse = Math.sqrt(dxToMouse * dxToMouse + dyToMouse * dyToMouse);
-                    
-                    if (distanceToMouse < ATTRACTION_RADIUS && distanceToMouse > 5) {
-                        const force = (ATTRACTION_RADIUS - distanceToMouse) / ATTRACTION_RADIUS * ATTRACTION_FORCE;
-                        const angle = Math.atan2(dyToMouse, dxToMouse);
-                        
-                        dot.vx += Math.cos(angle) * force * 2.0;
-                        dot.vy += Math.sin(angle) * force * 2.0;
-                    }
-                }
-                
-                if (!dot.isBeingConsumed) {
-                    if (dot.isFlashParticle && !dot.isAttractedToCenter) {
-                        dot.vx *= 0.992;
-                        dot.vy *= 0.992;
-                    } else if (!dot.isFlashParticle) {
-                        dot.vx *= 0.998;
-                        dot.vy *= 0.998;
-                    }
-                }
-                
-                if (!dot.isBeingConsumed) {
-                    dot.x += dot.vx;
-                    dot.y += dot.vy;
-                    
-                    if (dot.x < -50 || dot.x > window.innerWidth + 50 ||
-                        dot.y < -50 || dot.y > window.innerHeight + 50 ||
-                        dot.lifetime > dot.maxLifetime) {
-                        return false;
-                    }
-                    
-                    if (!dot.isAttractedToCenter) {
-                        let edgeOpacity = 1;
-                        if (dot.x < FADE_DISTANCE) edgeOpacity = Math.min(edgeOpacity, dot.x / FADE_DISTANCE);
-                        if (dot.x > window.innerWidth - FADE_DISTANCE) edgeOpacity = Math.min(edgeOpacity, (window.innerWidth - dot.x) / FADE_DISTANCE);
-                        if (dot.y < FADE_DISTANCE) edgeOpacity = Math.min(edgeOpacity, dot.y / FADE_DISTANCE);
-                        if (dot.y > window.innerHeight - FADE_DISTANCE) edgeOpacity = Math.min(edgeOpacity, (window.innerHeight - dot.y) / FADE_DISTANCE);
-                        
-                        if (dot.lifetime > dot.maxLifetime * 0.7) {
-                            const fadeProgress = (dot.maxLifetime - dot.lifetime) / (dot.maxLifetime * 0.3);
-                            edgeOpacity = Math.min(edgeOpacity, Math.max(0.1, fadeProgress));
-                        }
-                        
-                        dot.element.style.opacity = Math.max(0.1, dot.opacity * edgeOpacity);
-                    }
-                    
-                    dot.element.style.transform = `translate3d(${dot.x}px, ${dot.y}px, 0)`;
-                }
-                
-                return true;
-            }
-            
-            // Основной цикл анимации
-            function animate() {
-                const dotsToRemove = [];
-                
-                for (let i = 0; i < dots.length; i++) {
-                    if (!updateDot(dots[i], i)) {
-                        if (dots[i].element.parentNode) {
-                            dots[i].element.parentNode.removeChild(dots[i].element);
-                        }
-                        dotsToRemove.push(i);
-                    }
-                }
-                
-                for (let i = dotsToRemove.length - 1; i >= 0; i--) {
-                    dots.splice(dotsToRemove[i], 1);
-                }
-                
-                const regularDotsCount = dots.filter(d => !d.isFlashParticle).length;
-                if (regularDotsCount < MAX_DOTS) {
-                    const dotsToAdd = Math.min(2, MAX_DOTS - regularDotsCount);
-                    for (let i = 0; i < dotsToAdd; i++) {
-                        dots.push(createRegularDot());
-                    }
-                }
-                
-                animationId = requestAnimationFrame(animate);
-            }
-            
-            // Обработчик изменения размера окна
-            function handleResize() {
-                logoCenterX = window.innerWidth / 2;
-                logoCenterY = window.innerHeight / 2;
-                
-                dots.forEach(dot => {
-                    if (dot.element.parentNode) {
-                        dot.element.parentNode.removeChild(dot.element);
-                    }
-                });
-                
-                dots.length = 0;
-                initRegularDots();
-            }
-            
-            window.addEventListener('resize', handleResize);
-            
-            // Запуск
-            initRegularDots();
-            animate();
-            
-            // Очистка при разгрузке страницы
-            window.addEventListener('beforeunload', () => {
-                if (animationId) {
-                    cancelAnimationFrame(animationId);
-                }
-            });
-            
-            // Инициализация после полной загрузки
-            window.addEventListener('load', () => {
-                // Повторная попытка запустить видео
-                playVideo();
-            });
-        });
-    </script>
+
+</div>
+
+<script>
+const logo = document.getElementById('logo');
+const percentageText = document.getElementById('percentageText');
+const timerWrapper = document.getElementById('timerWrapper');
+const timerText = document.getElementById('timerText');
+
+const TRANSITION_MS = 1600;  // 800 -> 1600
+let mode = 'logo';
+let busy = false;
+
+function toTextMode(){
+    if (busy || mode === 'text') return;
+    busy = true;
+    mode = 'text';
+
+    // одновременно: лого исчезает + таймер опускается
+    logo.classList.add('hidden');
+    timerWrapper.classList.add('text-mode');
+
+    // текст над таймером появляется ТОЛЬКО после завершения анимации
+    setTimeout(() => {
+        timerWrapper.classList.add('text-shown');    // включает .timer-replacement
+        percentageText.classList.add('active');      // 98% вместо лого
+        busy = false;
+    }, TRANSITION_MS);
+}
+
+function toLogoMode(){
+    if (busy || mode === 'logo') return;
+    busy = true;
+    mode = 'logo';
+
+    // сначала убрать тексты
+    percentageText.classList.remove('active');
+    timerWrapper.classList.remove('text-shown');
+
+    // затем вернуть таймер наверх (анимация 1600ms)
+    timerWrapper.classList.remove('text-mode');
+
+    // после окончания анимации вернуть лого
+    setTimeout(() => {
+        logo.classList.remove('hidden');
+        busy = false;
+    }, TRANSITION_MS);
+}
+
+logo.addEventListener('pointerup', e => { e.preventDefault(); toTextMode(); });
+percentageText.addEventListener('pointerup', e => { e.preventDefault(); toLogoMode(); });
+timerText.addEventListener('pointerup', e => { e.preventDefault(); toLogoMode(); });
+
+/* ===== TIMER LOGIC ===== */
+const startDate = new Date(2021,5,21,0,0,0);
+const pad2 = n => String(n).padStart(2,'0');
+
+function tick(){
+    const now = new Date();
+    const diff = Math.max(0, now - startDate);
+    const s = Math.floor(diff / 1000);
+
+    const totalDays = Math.floor(s / 86400);
+    const hours = Math.floor((s % 86400) / 3600);
+    const minutes = Math.floor((s % 3600) / 60);
+    const seconds = s % 60;
+
+    const years = Math.floor(totalDays / 365);
+
+    const mRaw = Math.floor((totalDays % 365) / 30);
+    const months = (mRaw < 10) ? (' ' + mRaw) : String(mRaw);
+
+    document.querySelector('.years .fg').textContent = years;
+    document.querySelector('.months .fg').textContent = months;
+    document.querySelector('.days .fg').textContent = pad2((totalDays % 365) % 30);
+    document.querySelector('.hours .fg').textContent = pad2(hours);
+    document.querySelector('.minutes .fg').textContent = pad2(minutes);
+    document.querySelector('.seconds .fg').textContent = pad2(seconds);
+}
+
+
+tick();
+setInterval(tick, 1000);
+
+</script>
+
 </body>
 </html>
