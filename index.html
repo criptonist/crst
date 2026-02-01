@@ -20,7 +20,6 @@ body{
     font-family:Arial,sans-serif;
 }
 
-/* ===== LAYOUT ===== */
 .container{
     display:flex;
     align-items:center;
@@ -30,7 +29,6 @@ body{
     width:100%;
 }
 
-/* ===== TIMER ===== */
 @font-face{
     font-family:'digital-7';
     src:url('digital-7.ttf');
@@ -48,7 +46,6 @@ main.clock-display.elapsed-timer{
     transition:transform 1600ms ease;
 }
 
-/* таймер опускается */
 .timer-wrapper.text-mode main.clock-display.elapsed-timer{
     transform:translateY(90px);
 }
@@ -57,7 +54,7 @@ main.clock-display.elapsed-timer{
     width:160px;
     display:flex;
     flex-direction:column;
-    align-items:center; /* ГЛАВНЫЙ ЦЕНТР */
+    align-items:center;
 }
 
 .elapsed-timer .num{
@@ -67,10 +64,9 @@ main.clock-display.elapsed-timer{
     font-size:110px;
     line-height:1;
     text-align:center;
-    display:block;              /* ВАЖНО: не flex */
+    display:block;
 }
 
-/* серый фон под цифрами */
 .elapsed-timer .num::before{
     content:"88";
     position:absolute;
@@ -78,11 +74,10 @@ main.clock-display.elapsed-timer{
     color:#002200;
     pointer-events:none;
     z-index:0;
-    display:block;              /* ВАЖНО: не flex */
+    display:block;
     text-align:center;
 }
 
-/* индивидуальные фоны */
 .elapsed-timer .years::before{ content:"8"; }
 .elapsed-timer .months::before{ content:"88"; }
 .elapsed-timer .days::before{ content:"88"; }
@@ -90,7 +85,6 @@ main.clock-display.elapsed-timer{
 .elapsed-timer .minutes::before{ content:"88"; }
 .elapsed-timer .seconds::before{ content:"88"; }
 
-/* реальные цифры */
 .elapsed-timer .num .fg{
     position:relative;
     z-index:1;
@@ -102,7 +96,6 @@ main.clock-display.elapsed-timer{
   display:block;
   text-align:center;
 }
-
 
 .elapsed-timer .months::before{
   content:"88";
@@ -125,7 +118,6 @@ main.clock-display.elapsed-timer{
   text-align:right;
 }
 
-/* подписи */
 .elapsed-timer .label{
     margin-top:8px;
     font-size:12px;
@@ -136,8 +128,6 @@ main.clock-display.elapsed-timer{
     text-align:center;
 }
 
-
-/* ===== TEXT REPLACEMENT ===== */
 .timer-replacement{
     position:absolute;
     left:0;
@@ -174,15 +164,12 @@ main.clock-display.elapsed-timer{
 }
 
 
-
-/* показываем текст только после окончания анимации (класс text-shown) */
 .timer-wrapper.text-shown .timer-replacement{
     opacity:1;
     transform:translateY(0);
     pointer-events:auto;
 }
 
-/* ===== LOGO / 98% ===== */
 .image-container{
     position:relative;
     width:220px;
@@ -197,7 +184,7 @@ main.clock-display.elapsed-timer{
     width:100%;
     max-width:240px;
     cursor:pointer;
-    transition:opacity 1600ms ease, transform 1600ms ease; /* 800 -> 1600 */
+    transition:opacity 1600ms ease, transform 1600ms ease;
 }
 
 .logo-img.hidden{
@@ -212,9 +199,9 @@ main.clock-display.elapsed-timer{
     align-items: flex-start;
     gap: 8px;
 
-    font-size: 60px;          /* ← шрифт */
+    font-size: 60px;
     font-weight: bold;
-    text-align: center;       /* ← выравнивание текста */
+    text-align: center;
 
     white-space: normal;
     overflow-wrap: break-word;
@@ -252,7 +239,7 @@ main.clock-display.elapsed-timer{
 .percentage-number{
     font-size:120px;
     position:relative;
-    top:-12px;   /* подбирай значение */
+    top:-12px;
 }
 
 .percentage-text,
@@ -268,44 +255,122 @@ main.clock-display.elapsed-timer{
 
 .percentage-sign{font-size:52px;margin-top:20px;}
 
+.timer-replacement-mobile{
+  display: none;
+}
+
 @media (max-width: 768px){
 
-    /* скрываем всё кроме таймера */
-    .image-container,
-    .timer-replacement {
-        display: none !important;
-    }
+  body{
+    justify-content: center;
+  }
 
-    body{
-        justify-content: center;
-    }
+  .container{
+    justify-content: center;
+    padding-left: 0;
+  }
 
-    .container{
-        padding: 0;
-        justify-content: center;
-        align-items: center;
-    }
+  .image-container{ display:none !important; }
 
-    /* вертикальный таймер */
-    main.clock-display.elapsed-timer{
-        flex-direction: column;
-        align-items: center;
-        transform: none !important;
-    }
+  main.clock-display.elapsed-timer{
+    transition: opacity 800ms ease, transform 400ms ease;
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
 
-    .elapsed-timer .block{
-        width: auto;
-    }
+  .timer-wrapper.mobile-text-shown main.clock-display.elapsed-timer{
+    opacity: 0;
+    transform: translateY(10px);
+    pointer-events: none;
+  }
 
-    .elapsed-timer .num{
-        font-size: 64px;
-    }
+  .timer-replacement{
+    display: none !important;
+  }
 
-    .elapsed-timer .label{
-        font-size: 10px;
-        margin-bottom: 12px;
-    }
+  .timer-replacement-mobile{
+    display:flex;
+    position:fixed;
+    inset:0;
+    background:#000;
+    color:#00bb00;
+
+    box-sizing:border-box;
+    padding:
+      clamp(16px, 4vh, 32px)
+      clamp(14px, 5vw, 28px);
+
+    font-size: 21px;
+    line-height: clamp(1.35, 4.5vw, 1.55);
+    font-weight: 200;
+
+    max-height:100svh;
+    overflow-y:auto;
+
+    word-break:break-word;
+    hyphens:auto;
+
+    align-items:center;  
+    justify-content:center; 
+    text-align: justify;
+    text-justify: inter-word;
+    text-align-last: left;
+
+    transition: opacity 1000ms ease 200ms, transform 1000ms ease 200ms;
+    opacity: 0;
+    transform: translateY(0px);
+    pointer-events: none;
+    z-index:9999;
+  }
+
+  .timer-wrapper.mobile-text-shown .timer-replacement-mobile{
+    transition-delay: 200ms;  
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  main.clock-display.elapsed-timer{
+    flex-direction: column;
+    align-items: center;
+    transform: none !important;
+
+    transition: opacity 600ms ease;
+    opacity: 1;
+    pointer-events: auto;
+    transition-delay: 400ms;
+  }
+
+  .timer-wrapper.mobile-text-shown
+  main.clock-display.elapsed-timer{
+    transition-delay: 0ms;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .timer-replacement-mobile{
+    transition: opacity 800ms ease;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .timer-wrapper.mobile-text-shown
+  .timer-replacement-mobile{
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .elapsed-timer .block{ width:auto; }
+  .elapsed-timer .num{ font-size:64px; }
+  .elapsed-timer .label{ font-size:10px; margin-bottom:12px; }
+
+  #timer, #timerTextMobile{
+    cursor: pointer;
+    touch-action: manipulation;
+  }
 }
+
 
 </style>
 </head>
@@ -314,11 +379,12 @@ main.clock-display.elapsed-timer{
 
 <div class="container">
 
-    <!-- TIMER + TEXT -->
     <div class="timer-wrapper" id="timerWrapper">
 
         <div class="timer-replacement" id="timerText">
-            <div>June 21, 2021 I began studying the secp256k1 curve for vulnerabilities, as no one had proven otherwise. My goal is simple, yet very challenging: to derive a private key from any XY coordinate at any given moment, thereby solving ECDLP in polynomial time. This is not the death of Bitcoin, but it does mean it has unprecedented power to influence the crypto market and the world as a whole. One day, the timer will disappear...</div>
+            <div>June 21, 2021 I began studying the secp256k1 curve for vulnerabilities, as no one had proven otherwise. My goal is simple, yet very challenging: to derive a private key from any XY coordinate at any given moment, thereby solving ECDLP in polynomial time. This is not the death of Bitcoin, but it does mean it has unprecedented power to influence the crypto market and the world as a whole.<br>
+            <br>
+            One day, the timer will disappear...</div>
         </div>
 
         <main class="clock-display elapsed-timer" id="timer">
@@ -366,11 +432,13 @@ main.clock-display.elapsed-timer{
             </div>
 
         </main>
-
-
+        <div class="timer-replacement-mobile" id="timerTextMobile">
+            <div>June 21, 2021 I began studying the secp256k1 curve for vulnerabilities, as no one had proven otherwise. My goal is simple, yet very challenging: to derive a private key from any XY coordinate at any given moment, thereby solving ECDLP in polynomial time. This is not the death of Bitcoin, but it does mean it has unprecedented power to influence the crypto market and the world as a whole.<br>
+            <br>
+            One day, the timer will disappear...</div>
+        </div>
     </div>
 
-    <!-- LOGO / 98% -->
     <div class="image-container">
         <img src="logo.png" class="logo-img" id="logo" alt="logo">
         <div class="percentage-text" id="percentageText">
@@ -387,7 +455,7 @@ const percentageText = document.getElementById('percentageText');
 const timerWrapper = document.getElementById('timerWrapper');
 const timerText = document.getElementById('timerText');
 
-const TRANSITION_MS = 1600;  // 800 -> 1600
+const TRANSITION_MS = 1600;
 let mode = 'logo';
 let busy = false;
 
@@ -396,14 +464,12 @@ function toTextMode(){
     busy = true;
     mode = 'text';
 
-    // одновременно: лого исчезает + таймер опускается
     logo.classList.add('hidden');
     timerWrapper.classList.add('text-mode');
 
-    // текст над таймером появляется ТОЛЬКО после завершения анимации
     setTimeout(() => {
-        timerWrapper.classList.add('text-shown');    // включает .timer-replacement
-        percentageText.classList.add('active');      // 98% вместо лого
+        timerWrapper.classList.add('text-shown'); 
+        percentageText.classList.add('active'); 
         busy = false;
     }, TRANSITION_MS);
 }
@@ -413,14 +479,11 @@ function toLogoMode(){
     busy = true;
     mode = 'logo';
 
-    // сначала убрать тексты
     percentageText.classList.remove('active');
     timerWrapper.classList.remove('text-shown');
 
-    // затем вернуть таймер наверх (анимация 1600ms)
     timerWrapper.classList.remove('text-mode');
 
-    // после окончания анимации вернуть лого
     setTimeout(() => {
         logo.classList.remove('hidden');
         busy = false;
@@ -431,7 +494,6 @@ logo.addEventListener('pointerup', e => { e.preventDefault(); toTextMode(); });
 percentageText.addEventListener('pointerup', e => { e.preventDefault(); toLogoMode(); });
 timerText.addEventListener('pointerup', e => { e.preventDefault(); toLogoMode(); });
 
-/* ===== TIMER LOGIC ===== */
 const startDate = new Date(2021,5,21,0,0,0);
 const pad2 = n => String(n).padStart(2,'0');
 
@@ -458,11 +520,35 @@ function tick(){
     document.querySelector('.seconds .fg').textContent = pad2(seconds);
 }
 
-
 tick();
 setInterval(tick, 1000);
 
-</script>
+const timer = document.getElementById('timer');
+const timerTextMobile = document.getElementById('timerTextMobile');
 
+function isMobile(){
+  return window.matchMedia('(max-width: 768px)').matches;
+}
+
+function showMobileText(e){
+  if (!isMobile()) return;
+  if (e) e.preventDefault();
+  timerWrapper.classList.add('mobile-text-shown');
+}
+
+function hideMobileText(e){
+  if (!isMobile()) return;
+  if (e) e.preventDefault();
+  timerWrapper.classList.remove('mobile-text-shown');
+}
+
+timer.addEventListener('click', showMobileText);
+timer.addEventListener('pointerup', showMobileText);
+timer.addEventListener('touchend', showMobileText, { passive: false });
+
+timerTextMobile.addEventListener('click', hideMobileText);
+timerTextMobile.addEventListener('pointerup', hideMobileText);
+timerTextMobile.addEventListener('touchend', hideMobileText, { passive: false });
+</script>
 </body>
 </html>
