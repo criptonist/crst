@@ -255,6 +255,17 @@ main.clock-display.elapsed-timer{
     top:-12px;   /* подбирай значение */
 }
 
+.percentage-text,
+.percentage-label,
+.percentage-number,
+.percentage-sign{
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    letter-spacing: .06em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
 .percentage-sign{font-size:52px;margin-top:20px;}
 
 @media (max-width: 768px){
@@ -287,7 +298,7 @@ main.clock-display.elapsed-timer{
     }
 
     .elapsed-timer .num{
-        font-size: 80px;
+        font-size: 64px;
     }
 
     .elapsed-timer .label{
@@ -307,7 +318,7 @@ main.clock-display.elapsed-timer{
     <div class="timer-wrapper" id="timerWrapper">
 
         <div class="timer-replacement" id="timerText">
-            <div>21, 2021, I began studying the secp256k1 curve for vulnerabilities, as no one had proven otherwise. My goal is simple, yet very challenging: to derive a private key from any XY coordinate at any given moment, thereby solving ECDLP in polynomial time. This is not the death of Bitcoin, but it does mean it has unprecedented power to influence the crypto market and the world as a whole. One day, the timer will disappear...</div>
+            <div>June 21, 2021 I began studying the secp256k1 curve for vulnerabilities, as no one had proven otherwise. My goal is simple, yet very challenging: to derive a private key from any XY coordinate at any given moment, thereby solving ECDLP in polynomial time. This is not the death of Bitcoin, but it does mean it has unprecedented power to influence the crypto market and the world as a whole. One day, the timer will disappear...</div>
         </div>
 
         <main class="clock-display elapsed-timer" id="timer">
