@@ -371,6 +371,21 @@ main.clock-display.elapsed-timer{
   }
 }
 
+.mute-btn{
+    position:fixed;
+    top:20px;
+    right:20px;
+    width:40px;
+    height:40px;
+    cursor:pointer;
+    z-index:10000;
+}
+
+.sound-svg{
+    width:100%;
+    height:100%;
+    display:block;
+}
 
 </style>
 </head>
@@ -450,6 +465,50 @@ main.clock-display.elapsed-timer{
 </div>
 
 <audio id="bgMusic" src="matrix.mp3" autoplay loop></audio>
+<div id="muteBtn" class="mute-btn" role="button" tabindex="0" aria-label="Sound toggle">
+  <svg class="sound-svg" width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
+    <defs>
+      <!-- Инверсия яркости (чтобы черная иконка работала как маска) -->
+      <filter id="invLum" color-interpolation-filters="sRGB">
+        <feColorMatrix type="matrix" values="
+          -1  0  0  0  1
+           0 -1  0  0  1
+           0  0 -1  0  1
+           0  0  0  1  0"/>
+      </filter>
+
+      <!-- Маска по luminance + инверсия -->
+      <mask id="iconMask"
+            maskUnits="userSpaceOnUse"
+            x="0" y="0" width="40" height="40"
+            mask-type="luminance">
+        <g filter="url(#invLum)">
+          <image id="maskImg" href="son.png" width="40" height="40" />
+        </g>
+      </mask>
+
+      <!-- Горизонтальный градиент -->
+      <linearGradient id="flowGrad" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="transparent"/>
+        <stop offset="0.5" stop-color="#00aa00"/>
+        <stop offset="1" stop-color="transparent"/>
+      </linearGradient>
+    </defs>
+
+    <!-- База -->
+    <image id="baseIcon" href="son.png" width="40" height="40" />
+
+    <!-- Переливание строго внутри формы -->
+    <g mask="url(#iconMask)">
+      <rect x="-80" y="0" width="160" height="40" fill="url(#flowGrad)">
+        <animate attributeName="x"
+                 values="-124;0;-140"
+                 dur="5.0s"
+                 repeatCount="indefinite"/>
+      </rect>
+    </g>
+  </svg>
+</div>
 
 <script>
 const logo = document.getElementById('logo');
@@ -572,6 +631,34 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 });
+
+const audioEl = document.getElementById('bgMusic');
+const muteBtn = document.getElementById('muteBtn');
+
+const baseIcon = document.getElementById('baseIcon');
+const maskImg  = document.getElementById('maskImg');
+
+function updateIcon(){
+  const src = audioEl.muted ? 'soff.png' : 'son.png';
+  baseIcon.setAttribute('href', src);
+  maskImg.setAttribute('href', src);
+}
+
+function toggleSound(){
+  audioEl.muted = !audioEl.muted;
+  updateIcon();
+}
+
+muteBtn.addEventListener('click', toggleSound);
+muteBtn.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    toggleSound();
+  }
+});
+
+updateIcon();
+
 
 </script>
 </body>
