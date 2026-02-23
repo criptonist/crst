@@ -449,6 +449,8 @@ main.clock-display.elapsed-timer{
 
 </div>
 
+<audio id="bgMusic" src="matrix.mp3" autoplay loop></audio>
+
 <script>
 const logo = document.getElementById('logo');
 const percentageText = document.getElementById('percentageText');
@@ -549,6 +551,28 @@ timer.addEventListener('touchend', showMobileText, { passive: false });
 timerTextMobile.addEventListener('click', hideMobileText);
 timerTextMobile.addEventListener('pointerup', hideMobileText);
 timerTextMobile.addEventListener('touchend', hideMobileText, { passive: false });
+
+document.addEventListener('DOMContentLoaded', function () {
+    const audio = document.getElementById('bgMusic');
+
+    // Попытка автозапуска (может блокироваться браузером)
+    const playPromise = audio.play();
+    if (playPromise !== undefined) {
+        playPromise.catch(() => {
+            // Разблокировка по первому взаимодействию пользователя
+            const unlock = () => {
+                audio.play();
+                document.removeEventListener('click', unlock);
+                document.removeEventListener('pointerup', unlock);
+                document.removeEventListener('touchstart', unlock);
+            };
+            document.addEventListener('click', unlock);
+            document.addEventListener('pointerup', unlock);
+            document.addEventListener('touchstart', unlock);
+        });
+    }
+});
+
 </script>
 </body>
 </html>
