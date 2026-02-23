@@ -469,13 +469,13 @@ main.clock-display.elapsed-timer{
 
 </div>
 
-<audio id="bgMusic" src="matrix.mp3" autoplay loop></audio>
+<audio id="bgMusic" src="crst_theme.mp3" autoplay loop></audio>
 <div id="muteBtn" class="mute-btn" role="button" tabindex="0" aria-label="Sound toggle">
   <svg class="sound-svg" width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
     <defs>
       <!-- Инверсия яркости (чтобы черная иконка работала как маска) -->
       <filter id="invLum" color-interpolation-filters="sRGB">
-        <feColorMatrix type="matrix" values="
+        <feColorMatrix type="crst_theme" values="
           -1  0  0  0  1
            0 -1  0  0  1
            0  0 -1  0  1
