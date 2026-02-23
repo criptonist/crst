@@ -617,24 +617,33 @@ timerTextMobile.addEventListener('pointerup', hideMobileText);
 timerTextMobile.addEventListener('touchend', hideMobileText, { passive: false });
 
 document.addEventListener('DOMContentLoaded', function () {
-    const audio = document.getElementById('bgMusic');
+  const audio = document.getElementById('bgMusic');
 
-    // Попытка автозапуска (может блокироваться браузером)
-    const playPromise = audio.play();
-    if (playPromise !== undefined) {
-        playPromise.catch(() => {
-            // Разблокировка по первому взаимодействию пользователя
-            const unlock = () => {
-                audio.play();
-                document.removeEventListener('click', unlock);
-                document.removeEventListener('pointerup', unlock);
-                document.removeEventListener('touchstart', unlock);
-            };
-            document.addEventListener('click', unlock);
-            document.addEventListener('pointerup', unlock);
-            document.addEventListener('touchstart', unlock);
-        });
-    }
+  // мобилка: звук полностью выключен
+  if (window.matchMedia('(max-width: 768px)').matches) {
+    audio.pause();
+    audio.currentTime = 0;
+    audio.muted = true;
+    audio.autoplay = false;
+    audio.removeAttribute('autoplay');
+    return;
+  }
+
+  // десктоп: как было
+  const playPromise = audio.play();
+  if (playPromise !== undefined) {
+    playPromise.catch(() => {
+      const unlock = () => {
+        audio.play();
+        document.removeEventListener('click', unlock);
+        document.removeEventListener('pointerup', unlock);
+        document.removeEventListener('touchstart', unlock);
+      };
+      document.addEventListener('click', unlock);
+      document.addEventListener('pointerup', unlock);
+      document.addEventListener('touchstart', unlock);
+    });
+  }
 });
 
 const audioEl = document.getElementById('bgMusic');
